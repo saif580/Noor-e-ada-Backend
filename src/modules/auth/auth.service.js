@@ -44,7 +44,7 @@ const issueVerificationToken = async (user) => {
 
   await sendMail({
     to: user.email,
-    subject: "Verify your email address – Fashion Store",
+    subject: "Verify your email address - Noor-e-ada",
     html: verifyEmailTemplate({
       firstName: user.first_name,
       verifyUrl: `${frontendUrl}/verify-email?token=${verifyToken}`,
@@ -136,7 +136,7 @@ const verifyEmail = async (token) => {
   if (user) {
     await sendMail({
       to: user.email,
-      subject: "Welcome to Fashion Store!",
+      subject: "Welcome to Noor-e-ada!",
       html: welcomeTemplate({ firstName: user.first_name }),
     });
   }
@@ -165,7 +165,7 @@ const forgotPassword = async (email) => {
 
   await sendMail({
     to: user.email,
-    subject: "Reset your password – Fashion Store",
+    subject: "Reset your password - Noor-e-ada",
     html: resetPasswordTemplate({
       firstName: user.first_name,
       resetUrl: `${frontendUrl}/reset-password?token=${resetToken}`,

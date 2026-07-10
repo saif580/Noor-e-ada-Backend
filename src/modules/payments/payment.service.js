@@ -5,6 +5,7 @@ const paymentRepository = require("./payment.repository");
 const orderRepository = require("../orders/order.repository");
 const userRepository = require("../users/user.repository");
 const { sendMail } = require("../../utils/email");
+const { brandHeaderHtml } = require("../../utils/emailTemplates");
 const { createHttpError } = require("../../utils/httpError");
 
 const buildPaymentSuccessHtml = ({ order, user, payment }) => {
@@ -21,6 +22,7 @@ const buildPaymentSuccessHtml = ({ order, user, payment }) => {
 
   return `
     <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;color:#222;">
+      ${brandHeaderHtml}
       <h2>Payment successful</h2>
       <p>Hi ${user.first_name || user.name},</p>
       <p>We've received your payment and confirmed order <strong>${order.order_number}</strong>.</p>

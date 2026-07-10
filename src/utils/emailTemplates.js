@@ -1,3 +1,21 @@
+const { brandLogoUrl: configuredLogoUrl } = require("../config/env");
+
+const brandName = "Noor-e-ada";
+const brandLogoUrl = configuredLogoUrl;
+
+const brandHeaderHtml = `
+  <div style="text-align:center;margin-bottom:24px;">
+    ${brandLogoUrl ? `<img src="${brandLogoUrl}" alt="${brandName}" width="220"
+         style="display:block;width:220px;max-width:80%;height:auto;margin:0 auto 8px;" />` : ""}
+    <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:500;color:#251c17;letter-spacing:6px;text-transform:uppercase;">
+      NOOR-E-ADA
+    </div>
+    <div style="font-size:10px;font-weight:700;color:#786a60;letter-spacing:5px;text-transform:uppercase;margin-top:4px;">
+      Ethnic Wear
+    </div>
+  </div>
+`;
+
 const baseTemplate = ({ previewText, headerText, bodyHtml, buttonUrl, buttonText, footerNote }) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -17,9 +35,7 @@ const baseTemplate = ({ previewText, headerText, bodyHtml, buttonUrl, buttonText
           <!-- Header -->
           <tr>
             <td align="center" style="padding-bottom:24px;">
-              <span style="font-size:22px;font-weight:700;color:#111827;letter-spacing:2px;text-transform:uppercase;">
-                Fashion Store
-              </span>
+              ${brandHeaderHtml}
             </td>
           </tr>
 
@@ -67,7 +83,7 @@ const baseTemplate = ({ previewText, headerText, bodyHtml, buttonUrl, buttonText
           <tr>
             <td align="center" style="padding-top:24px;">
               <p style="margin:0;font-size:12px;color:#9ca3af;">
-                &copy; ${new Date().getFullYear()} Fashion Store. All rights reserved.
+                &copy; ${new Date().getFullYear()} ${brandName}. All rights reserved.
               </p>
             </td>
           </tr>
@@ -82,7 +98,7 @@ const baseTemplate = ({ previewText, headerText, bodyHtml, buttonUrl, buttonText
 
 const verifyEmailTemplate = ({ firstName, verifyUrl }) =>
   baseTemplate({
-    previewText: "Verify your email to start shopping at Fashion Store.",
+    previewText: `Verify your email to start shopping at ${brandName}.`,
     headerText: "Verify your email address",
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:16px;color:#374151;line-height:1.6;">
@@ -95,12 +111,12 @@ const verifyEmailTemplate = ({ firstName, verifyUrl }) =>
     `,
     buttonUrl: verifyUrl,
     buttonText: "Verify Email Address",
-    footerNote: "If you didn't create an account with Fashion Store, you can safely ignore this email.",
+    footerNote: `If you didn't create an account with ${brandName}, you can safely ignore this email.`,
   });
 
 const resetPasswordTemplate = ({ firstName, resetUrl }) =>
   baseTemplate({
-    previewText: "Reset your Fashion Store password.",
+    previewText: `Reset your ${brandName} password.`,
     headerText: "Reset your password",
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:16px;color:#374151;line-height:1.6;">
@@ -122,7 +138,7 @@ const resetPasswordTemplate = ({ firstName, resetUrl }) =>
 
 const welcomeTemplate = ({ firstName }) =>
   baseTemplate({
-    previewText: "Welcome to Fashion Store — you're all set!",
+    previewText: `Welcome to ${brandName} - you're all set!`,
     headerText: `Welcome, ${firstName}!`,
     bodyHtml: `
       <p style="margin:0 0 16px;font-size:16px;color:#374151;line-height:1.6;">
@@ -137,4 +153,4 @@ const welcomeTemplate = ({ firstName }) =>
     footerNote: null,
   });
 
-module.exports = { verifyEmailTemplate, resetPasswordTemplate, welcomeTemplate };
+module.exports = { brandHeaderHtml, verifyEmailTemplate, resetPasswordTemplate, welcomeTemplate };

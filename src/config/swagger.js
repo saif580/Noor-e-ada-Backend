@@ -6,9 +6,9 @@ const swaggerOptions = {
   definition: {
     openapi: "3.0.3",
     info: {
-      title: "Fashion Store Backend API",
+      title: "Noor-e-ada Backend API",
       version: "1.0.0",
-      description: "API documentation for the Fashion Store backend.",
+      description: "API documentation for the Noor-e-ada backend.",
     },
     servers: [
       {

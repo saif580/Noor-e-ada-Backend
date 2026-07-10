@@ -9,7 +9,7 @@
 - [x] Swagger/OpenAPI documentation
 - [x] Global error handler and 404 handler
 - [x] Rate limiting middleware
-- [ ] Decide whether `uat` will use sandbox SMTP or real SMTP
+- [x] Decide whether `uat` will use sandbox SMTP or real SMTP: Mailtrap sandbox for UAT
 - [ ] Add `.env` documentation for required variables
 
 ## Auth
@@ -83,7 +83,26 @@
 - [x] POST /api/payments/verify — verify HMAC signature, confirm order
 - [x] POST /api/payments/webhook — handle payment.captured / payment.failed events
 - [x] Send payment success email after verified/captured Razorpay payment
-- [ ] Configure RAZORPAY_WEBHOOK_SECRET and register webhook URL in Razorpay dashboard
+- [x] Configure RAZORPAY_WEBHOOK_SECRET and register webhook URL in Razorpay dashboard for UAT
+
+## UAT Deployment
+
+- [x] Choose UAT backend host: Render free web service
+- [x] Configure Render service from backend GitHub repo
+- [x] Configure Render service branch: `uat`
+- [x] Configure Render build command: `npm install`
+- [x] Configure Render start command: `npm run start:uat`
+- [x] Configure Render health check path: `/api/health`
+- [x] Configure Render env: `APP_ENV=uat`
+- [x] Configure Render env: `APP_BASE_URL=https://noor-e-ada-backend-uat.onrender.com`
+- [x] Configure Render env: `DATABASE_URL` for Supabase UAT database
+- [x] Configure Render secrets: JWT, refresh JWT, Cloudinary, Razorpay, and Mailtrap
+- [x] Deploy backend to Render: `https://noor-e-ada-backend-uat.onrender.com`
+- [x] Add UAT frontend CORS allowlist support through `FRONTEND_URL`
+- [ ] Update Render env `FRONTEND_URL` after final Vercel frontend URL is confirmed
+- [ ] Verify `GET /api/health` from deployed Render URL
+- [ ] Run deployed API smoke test: auth, catalog, cart, checkout, wishlist, reviews
+- [ ] Document UAT backend URL, env var names, webhook secret handling, and rollback steps
 
 ## Coupons & Discounts
 
