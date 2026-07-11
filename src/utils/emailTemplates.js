@@ -1,7 +1,7 @@
-const { brandLogoUrl: configuredLogoUrl } = require("../config/env");
+const { brandLogoUrl: configuredLogoUrl, frontendUrl } = require("../config/env");
 
 const brandName = "Noor-e-ada";
-const brandLogoUrl = configuredLogoUrl;
+const brandLogoUrl = configuredLogoUrl || `${frontendUrl.replace(/\/$/, "")}/logo.png`;
 
 const brandHeaderHtml = `
   <div style="text-align:center;margin-bottom:24px;">
