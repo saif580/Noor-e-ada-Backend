@@ -402,6 +402,19 @@ const initializeDatabase = async () => {
   await query(`
     DO $$ BEGIN
       IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'value'
+      ) THEN
+        ALTER TABLE coupons ADD COLUMN value NUMERIC(12,2) NOT NULL DEFAULT 0;
+      END IF;
+    END $$;
+  `);
+
+  await query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
         SELECT 1 FROM pg_trigger WHERE tgname = 'trg_coupons_updated_at'
       ) THEN
         CREATE TRIGGER trg_coupons_updated_at
