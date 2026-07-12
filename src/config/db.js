@@ -415,6 +415,58 @@ const initializeDatabase = async () => {
   await query(`
     DO $$ BEGIN
       IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'min_purchase_amount'
+      ) THEN
+        ALTER TABLE coupons ADD COLUMN min_purchase_amount NUMERIC(12,2) NOT NULL DEFAULT 0;
+      END IF;
+    END $$;
+  `);
+
+  await query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'usage_limit'
+      ) THEN
+        ALTER TABLE coupons ADD COLUMN usage_limit INTEGER;
+      END IF;
+    END $$;
+  `);
+
+  await query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'uses_count'
+      ) THEN
+        ALTER TABLE coupons ADD COLUMN uses_count INTEGER NOT NULL DEFAULT 0;
+      END IF;
+    END $$;
+  `);
+
+  await query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'expires_at'
+      ) THEN
+        ALTER TABLE coupons ADD COLUMN expires_at TIMESTAMPTZ;
+      END IF;
+    END $$;
+  `);
+
+  await query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
         SELECT 1 FROM pg_trigger WHERE tgname = 'trg_coupons_updated_at'
       ) THEN
         CREATE TRIGGER trg_coupons_updated_at
