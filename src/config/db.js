@@ -371,6 +371,37 @@ const initializeDatabase = async () => {
   await query(`
     DO $$ BEGIN
       IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'type'
+      ) THEN
+        ALTER TABLE coupons ADD COLUMN type VARCHAR(20);
+      END IF;
+
+      IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_name = 'coupons'
+          AND column_name = 'discount_type'
+      ) THEN
+        UPDATE coupons
+        SET type = discount_type
+        WHERE type IS NULL;
+      END IF;
+
+      UPDATE coupons
+      SET type = 'fixed'
+      WHERE type IS NULL;
+
+      ALTER TABLE coupons
+      ALTER COLUMN type SET NOT NULL;
+    END $$;
+  `);
+
+  await query(`
+    DO $$ BEGIN
+      IF NOT EXISTS (
         SELECT 1 FROM pg_trigger WHERE tgname = 'trg_coupons_updated_at'
       ) THEN
         CREATE TRIGGER trg_coupons_updated_at
