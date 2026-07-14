@@ -11,6 +11,7 @@
 - [x] Rate limiting middleware
 - [x] Decide whether `uat` will use sandbox SMTP or real SMTP: Mailtrap sandbox for UAT
 - [ ] Add `.env` documentation for required variables
+- [ ] Rename remaining legacy `fashion-store` identifiers in package metadata and Cloudinary folder config
 
 ## Auth
 
@@ -26,6 +27,20 @@
 - [ ] Decide final password policy for production
 - [ ] Decide whether refresh tokens should be hashed in the database
 - [ ] Add auth audit logging for sensitive events
+
+## OAuth
+
+- [ ] Choose first OAuth provider for UAT, likely Google
+- [ ] Add OAuth env vars: provider client ID, client secret, callback URL, and frontend redirect URL
+- [ ] Add database support for OAuth identities or provider fields linked to users
+- [ ] Implement OAuth state/CSRF protection
+- [ ] Add `GET /api/auth/oauth/:provider` start endpoint
+- [ ] Add `GET /api/auth/oauth/:provider/callback` callback endpoint
+- [ ] Link OAuth login to an existing email account when safe
+- [ ] Create a new verified customer account from OAuth profile when no user exists
+- [ ] Issue the same JWT access token and refresh token pair used by password login
+- [ ] Add OAuth logout/session behavior notes
+- [ ] Add Swagger docs and UAT redirect URI setup notes for OAuth
 
 ## Users
 
@@ -100,7 +115,7 @@
 - [x] Deploy backend to Render: `https://noor-e-ada-backend-uat.onrender.com`
 - [x] Add UAT frontend CORS allowlist support through `FRONTEND_URL`
 - [ ] Update Render env `FRONTEND_URL` after final Vercel frontend URL is confirmed
-- [ ] Verify `GET /api/health` from deployed Render URL
+- [x] Verify `GET /api/health` from deployed Render URL
 - [ ] Run deployed API smoke test: auth, catalog, cart, checkout, wishlist, reviews
 - [ ] Document UAT backend URL, env var names, webhook secret handling, and rollback steps
 
@@ -140,3 +155,4 @@
 - [ ] Keep Swagger docs updated for every new API
 - [ ] Re-export `docs/openapi.json` after API changes
 - [ ] Add `.env.example` file with all required variables
+- [ ] Document OAuth setup once provider credentials are created
