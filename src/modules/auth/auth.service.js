@@ -1,12 +1,22 @@
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const userRepository = require("../users/user.repository");
 const authRepository = require("./auth.repository");
 const { sendMail } = require("../../utils/email");
 const { verifyEmailTemplate, resetPasswordTemplate, welcomeTemplate } = require("../../utils/emailTemplates");
-const { jwtSecret, jwtExpiresIn, jwtRefreshSecret, jwtRefreshExpiresIn, frontendUrl } = require("../../config/env");
+const {
+  jwtSecret,
+  jwtExpiresIn,
+  jwtRefreshSecret,
+  jwtRefreshExpiresIn,
+  frontendUrl,
+  googleOAuthClientId,
+} = require("../../config/env");
 const { createHttpError } = require("../../utils/httpError");
+
+const googleClient = new OAuth2Client(googleOAuthClientId || undefined);
 
 const sanitizeUser = (user) => ({
   id: user.id,
@@ -36,6 +46,14 @@ const signRefreshToken = (user) =>
     { expiresIn: jwtRefreshExpiresIn },
   );
 
+const issueAuthTokens = async (user) => {
+  const accessToken = signAccessToken(user);
+  const refreshToken = signRefreshToken(user);
+  const refreshExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  await authRepository.saveRefreshToken(user.id, refreshToken, refreshExpiresAt);
+
+  return { user: sanitizeUser(user), accessToken, refreshToken };
+};
 
 const issueVerificationToken = async (user) => {
   const verifyToken = crypto.randomBytes(32).toString("hex");
@@ -87,12 +105,62 @@ const login = async ({ email, password }) => {
 
   if (!user.is_email_verified) throw createHttpError(403, "Please verify your email before logging in");
 
-  const accessToken = signAccessToken(user);
-  const refreshToken = signRefreshToken(user);
-  const refreshExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-  await authRepository.saveRefreshToken(user.id, refreshToken, refreshExpiresAt);
+  return issueAuthTokens(user);
+};
 
-  return { user: sanitizeUser(user), accessToken, refreshToken };
+const splitGoogleName = ({ given_name: givenName, family_name: familyName, name, email }) => {
+  const fallbackName = name || email.split("@")[0];
+  const parts = fallbackName.trim().split(/\s+/).filter(Boolean);
+  const firstName = givenName || parts[0] || "Noor-e-ada";
+  const lastName = familyName || parts.slice(1).join(" ") || "Customer";
+
+  return {
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    name: `${firstName} ${lastName}`.trim(),
+  };
+};
+
+const loginWithGoogle = async (idToken) => {
+  if (!googleOAuthClientId) {
+    throw createHttpError(503, "Google login is not configured");
+  }
+
+  let ticket;
+  try {
+    ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: googleOAuthClientId,
+    });
+  } catch {
+    throw createHttpError(401, "Google login could not be verified");
+  }
+
+  const payload = ticket.getPayload();
+  const email = payload?.email?.trim().toLowerCase();
+  if (!email || payload.email_verified !== true) {
+    throw createHttpError(401, "Google account email is not verified");
+  }
+
+  let user = await userRepository.findByEmail(email);
+  if (user?.is_active === false) {
+    throw createHttpError(403, "Your account has been deactivated");
+  }
+
+  if (!user) {
+    const userName = splitGoogleName({ ...payload, email });
+    const lockedPasswordHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10);
+    user = await userRepository.createOAuthUser({
+      ...userName,
+      email,
+      passwordHash: lockedPasswordHash,
+    });
+  } else if (!user.is_email_verified) {
+    await userRepository.markEmailVerified(user.id);
+    user = await userRepository.findById(user.id);
+  }
+
+  return issueAuthTokens(user);
 };
 
 const refresh = async (token) => {
@@ -186,6 +254,7 @@ const resetPassword = async (token, newPassword) => {
 module.exports = {
   register,
   login,
+  loginWithGoogle,
   refresh,
   logout,
   verifyEmail,

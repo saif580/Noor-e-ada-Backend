@@ -40,6 +40,17 @@ const login = async (req, res, next) => {
   }
 };
 
+const googleLogin = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken?.trim()) throw createHttpError(400, "Google ID token is required");
+    const result = await authService.loginWithGoogle(idToken);
+    sendSuccess(res, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const refresh = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -113,6 +124,7 @@ const resetPassword = async (req, res, next) => {
 module.exports = {
   register,
   login,
+  googleLogin,
   refresh,
   logout,
   verifyEmail,

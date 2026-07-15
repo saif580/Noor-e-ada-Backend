@@ -25,6 +25,7 @@ module.exports = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "15m",
   jwtRefreshSecret: require_env("JWT_REFRESH_SECRET"),
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
+  googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || "",
   emailHost: process.env.EMAIL_HOST || "smtp.mailtrap.io",
   emailPort: Number(process.env.EMAIL_PORT) || 587,
   emailUser: process.env.EMAIL_USER || "",

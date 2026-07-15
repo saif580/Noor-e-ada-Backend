@@ -68,6 +68,28 @@ router.post("/login", loginLimiter, authController.login);
 
 /**
  * @swagger
+ * /api/auth/google:
+ *   post:
+ *     summary: Log in or register with Google
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [idToken]
+ *             properties:
+ *               idToken: { type: string }
+ *     responses:
+ *       200: { description: Google login successful, returns accessToken and refreshToken }
+ *       401: { description: Google token could not be verified }
+ *       503: { description: Google login is not configured }
+ */
+router.post("/google", loginLimiter, authController.googleLogin);
+
+/**
+ * @swagger
  * /api/auth/refresh:
  *   post:
  *     summary: Get a new access token using a refresh token

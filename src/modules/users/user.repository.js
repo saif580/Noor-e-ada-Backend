@@ -66,6 +66,54 @@ const createUser = async ({
   return rows[0];
 };
 
+const createOAuthUser = async ({
+  name,
+  firstName,
+  lastName,
+  email,
+  passwordHash,
+  isMarketingOptIn = false,
+  role = "customer",
+}) => {
+  const sql = `
+    INSERT INTO users (
+      name,
+      first_name,
+      last_name,
+      email,
+      phone,
+      password_hash,
+      role,
+      is_email_verified,
+      is_marketing_opt_in
+    )
+    VALUES ($1, $2, $3, $4, NULL, $5, $6, TRUE, $7)
+    RETURNING
+      id,
+      name,
+      first_name,
+      last_name,
+      email,
+      phone,
+      role,
+      is_email_verified,
+      is_marketing_opt_in,
+      created_at,
+      updated_at;
+  `;
+
+  const { rows } = await query(sql, [
+    name,
+    firstName,
+    lastName,
+    email,
+    passwordHash,
+    role,
+    isMarketingOptIn,
+  ]);
+  return rows[0];
+};
+
 const findByEmail = async (email) => {
   const { rows } = await query(
     `
@@ -363,6 +411,7 @@ const setUserActive = async (userId, isActive) => {
 
 module.exports = {
   createUser,
+  createOAuthUser,
   findByEmail,
   findById,
   markEmailVerified,

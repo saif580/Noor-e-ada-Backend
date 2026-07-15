@@ -30,17 +30,17 @@
 
 ## OAuth
 
-- [ ] Choose first OAuth provider for UAT, likely Google
-- [ ] Add OAuth env vars: provider client ID, client secret, callback URL, and frontend redirect URL
-- [ ] Add database support for OAuth identities or provider fields linked to users
-- [ ] Implement OAuth state/CSRF protection
-- [ ] Add `GET /api/auth/oauth/:provider` start endpoint
-- [ ] Add `GET /api/auth/oauth/:provider/callback` callback endpoint
-- [ ] Link OAuth login to an existing email account when safe
-- [ ] Create a new verified customer account from OAuth profile when no user exists
-- [ ] Issue the same JWT access token and refresh token pair used by password login
-- [ ] Add OAuth logout/session behavior notes
-- [ ] Add Swagger docs and UAT redirect URI setup notes for OAuth
+- [x] Choose first OAuth provider for UAT: Google
+- [x] Add Google ID-token verification dependency
+- [x] Add backend env var support: `GOOGLE_OAUTH_CLIENT_ID`
+- [x] Add `POST /api/auth/google` endpoint for Google credential exchange
+- [x] Link Google login to an existing email account when safe
+- [x] Create a new verified customer account from Google profile when no user exists
+- [x] Issue the same JWT access token and refresh token pair used by password login
+- [x] Add Swagger docs for Google credential exchange endpoint
+- [ ] Configure `GOOGLE_OAUTH_CLIENT_ID` in Render UAT and future production envs
+- [ ] Add `.env.example` docs for Google OAuth env vars
+- [ ] Consider dedicated OAuth identity table if more providers are added
 
 ## Users
 
