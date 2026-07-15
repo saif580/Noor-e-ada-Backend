@@ -90,6 +90,29 @@ router.post("/google", loginLimiter, authController.googleLogin);
 
 /**
  * @swagger
+ * /api/auth/facebook:
+ *   post:
+ *     summary: Log in or register with Facebook
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [accessToken]
+ *             properties:
+ *               accessToken: { type: string }
+ *     responses:
+ *       200: { description: Facebook login successful, returns accessToken and refreshToken }
+ *       400: { description: Facebook account did not provide an email address }
+ *       401: { description: Facebook token could not be verified }
+ *       503: { description: Facebook login is not configured }
+ */
+router.post("/facebook", loginLimiter, authController.facebookLogin);
+
+/**
+ * @swagger
  * /api/auth/refresh:
  *   post:
  *     summary: Get a new access token using a refresh token

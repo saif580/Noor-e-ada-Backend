@@ -33,13 +33,18 @@
 - [x] Choose first OAuth provider for UAT: Google
 - [x] Add Google ID-token verification dependency
 - [x] Add backend env var support: `GOOGLE_OAUTH_CLIENT_ID`
+- [x] Add backend env var support: `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET`
 - [x] Add `POST /api/auth/google` endpoint for Google credential exchange
+- [x] Add `POST /api/auth/facebook` endpoint for Facebook access-token exchange
 - [x] Link Google login to an existing email account when safe
-- [x] Create a new verified customer account from Google profile when no user exists
+- [x] Link Facebook login to an existing email account when safe
+- [x] Create a new verified customer account from Google/Facebook profile when no user exists
 - [x] Issue the same JWT access token and refresh token pair used by password login
-- [x] Add Swagger docs for Google credential exchange endpoint
+- [x] Add Swagger docs for Google/Facebook credential exchange endpoints
 - [ ] Configure `GOOGLE_OAUTH_CLIENT_ID` in Render UAT and future production envs
-- [ ] Add `.env.example` docs for Google OAuth env vars
+- [ ] Configure `FACEBOOK_APP_ID` and `FACEBOOK_APP_SECRET` in Render UAT and future production envs
+- [ ] Add `.env.example` docs for OAuth env vars
+- [ ] Revisit Instagram only as a business-account integration, not standard customer login
 - [ ] Consider dedicated OAuth identity table if more providers are added
 
 ## Users

@@ -13,6 +13,8 @@ const {
   jwtRefreshExpiresIn,
   frontendUrl,
   googleOAuthClientId,
+  facebookAppId,
+  facebookAppSecret,
 } = require("../../config/env");
 const { createHttpError } = require("../../utils/httpError");
 
@@ -108,7 +110,7 @@ const login = async ({ email, password }) => {
   return issueAuthTokens(user);
 };
 
-const splitGoogleName = ({ given_name: givenName, family_name: familyName, name, email }) => {
+const splitOAuthName = ({ givenName, familyName, name, email }) => {
   const fallbackName = name || email.split("@")[0];
   const parts = fallbackName.trim().split(/\s+/).filter(Boolean);
   const firstName = givenName || parts[0] || "Noor-e-ada";
@@ -119,6 +121,29 @@ const splitGoogleName = ({ given_name: givenName, family_name: familyName, name,
     lastName: lastName.trim(),
     name: `${firstName} ${lastName}`.trim(),
   };
+};
+
+const findOrCreateOAuthUser = async ({ email, firstName, lastName, name }) => {
+  let user = await userRepository.findByEmail(email);
+  if (user?.is_active === false) {
+    throw createHttpError(403, "Your account has been deactivated");
+  }
+
+  if (!user) {
+    const lockedPasswordHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10);
+    user = await userRepository.createOAuthUser({
+      firstName,
+      lastName,
+      name,
+      email,
+      passwordHash: lockedPasswordHash,
+    });
+  } else if (!user.is_email_verified) {
+    await userRepository.markEmailVerified(user.id);
+    user = await userRepository.findById(user.id);
+  }
+
+  return user;
 };
 
 const loginWithGoogle = async (idToken) => {
@@ -142,23 +167,60 @@ const loginWithGoogle = async (idToken) => {
     throw createHttpError(401, "Google account email is not verified");
   }
 
-  let user = await userRepository.findByEmail(email);
-  if (user?.is_active === false) {
-    throw createHttpError(403, "Your account has been deactivated");
+  const userName = splitOAuthName({
+    givenName: payload.given_name,
+    familyName: payload.family_name,
+    name: payload.name,
+    email,
+  });
+  const user = await findOrCreateOAuthUser({ ...userName, email });
+
+  return issueAuthTokens(user);
+};
+
+const fetchFacebookJson = async (url) => {
+  const response = await fetch(url);
+  const payload = await response.json();
+
+  if (!response.ok || payload.error) {
+    throw createHttpError(401, "Facebook login could not be verified");
   }
 
-  if (!user) {
-    const userName = splitGoogleName({ ...payload, email });
-    const lockedPasswordHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10);
-    user = await userRepository.createOAuthUser({
-      ...userName,
-      email,
-      passwordHash: lockedPasswordHash,
-    });
-  } else if (!user.is_email_verified) {
-    await userRepository.markEmailVerified(user.id);
-    user = await userRepository.findById(user.id);
+  return payload;
+};
+
+const loginWithFacebook = async (accessToken) => {
+  if (!facebookAppId || !facebookAppSecret) {
+    throw createHttpError(503, "Facebook login is not configured");
   }
+
+  const appAccessToken = `${facebookAppId}|${facebookAppSecret}`;
+  const debugUrl = new URL("https://graph.facebook.com/debug_token");
+  debugUrl.searchParams.set("input_token", accessToken);
+  debugUrl.searchParams.set("access_token", appAccessToken);
+
+  const debugPayload = await fetchFacebookJson(debugUrl.toString());
+  const tokenData = debugPayload.data;
+  if (!tokenData?.is_valid || tokenData.app_id !== facebookAppId || !tokenData.user_id) {
+    throw createHttpError(401, "Facebook login could not be verified");
+  }
+
+  const profileUrl = new URL("https://graph.facebook.com/me");
+  profileUrl.searchParams.set("fields", "id,name,first_name,last_name,email");
+  profileUrl.searchParams.set("access_token", accessToken);
+  const profile = await fetchFacebookJson(profileUrl.toString());
+  const email = profile?.email?.trim().toLowerCase();
+  if (!email) {
+    throw createHttpError(400, "Facebook did not provide an email address for this account");
+  }
+
+  const userName = splitOAuthName({
+    givenName: profile.first_name,
+    familyName: profile.last_name,
+    name: profile.name,
+    email,
+  });
+  const user = await findOrCreateOAuthUser({ ...userName, email });
 
   return issueAuthTokens(user);
 };
@@ -255,6 +317,7 @@ module.exports = {
   register,
   login,
   loginWithGoogle,
+  loginWithFacebook,
   refresh,
   logout,
   verifyEmail,

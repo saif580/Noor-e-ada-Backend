@@ -51,6 +51,17 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
+const facebookLogin = async (req, res, next) => {
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken?.trim()) throw createHttpError(400, "Facebook access token is required");
+    const result = await authService.loginWithFacebook(accessToken);
+    sendSuccess(res, result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const refresh = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -125,6 +136,7 @@ module.exports = {
   register,
   login,
   googleLogin,
+  facebookLogin,
   refresh,
   logout,
   verifyEmail,
