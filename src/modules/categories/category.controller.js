@@ -12,7 +12,7 @@ const listCategories = async (req, res, next) => {
 
 const getCategoryById = async (req, res, next) => {
   try {
-    const category = await categoryService.getCategoryById(Number(req.params.categoryId));
+    const category = await categoryService.getCategoryById(req.params.categoryId);
     sendSuccess(res, category);
   } catch (error) {
     next(error);
