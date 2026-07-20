@@ -43,7 +43,10 @@ const wouldCreateCycle = async (categoryId, newParentId) => {
 const listCategories = () => categoryRepository.listCategories();
 
 const getCategoryById = async (categoryId) => {
-  const category = await categoryRepository.findCategoryById(categoryId);
+  const isNumeric = /^\d+$/.test(String(categoryId));
+  const category = isNumeric
+    ? await categoryRepository.findCategoryById(categoryId)
+    : await categoryRepository.findCategoryBySlug(categoryId);
 
   if (!category) {
     throw createHttpError(404, "Category not found");
